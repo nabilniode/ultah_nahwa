@@ -29,18 +29,18 @@ const GrandFinale = () => {
   });
 
   useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    setIsHeartFormed(latest >= 0.85);
+    setIsHeartFormed(latest >= 0.6);
   });
 
-  // Fade and scale in the final text message
-  const finalOpacity = useTransform(scrollYProgress, [0.82, 0.95], [0, 1]);
-  const finalScale = useTransform(scrollYProgress, [0.82, 0.95], [0.85, 1]);
-  const finalY = useTransform(scrollYProgress, [0.82, 0.95], [30, 0]);
+  // Fade and scale in the chat message at 65% scroll progress, stays visible until 100%
+  const finalOpacity = useTransform(scrollYProgress, [0.65, 0.78], [0, 1]);
+  const finalScale = useTransform(scrollYProgress, [0.65, 0.78], [0.85, 1]);
+  const finalY = useTransform(scrollYProgress, [0.65, 0.78], [40, 0]);
 
   return (
     <div 
       ref={containerRef} 
-      className="relative min-h-[220vh] bg-gradient-to-b from-cream-dark via-blush-light to-cream-light overflow-hidden"
+      className="relative min-h-[300vh] bg-gradient-to-b from-cream-dark via-blush-light to-cream-light overflow-hidden"
     >
       {/* SVG Clip Path Definition for the Heart */}
       <svg width="0" height="0" className="absolute pointer-events-none">
@@ -102,7 +102,7 @@ const GrandFinale = () => {
         {/* Final Romantic Message (Love Chat Interface) */}
         <motion.div 
           style={{ opacity: finalOpacity, scale: finalScale, y: finalY }}
-          className="absolute z-20 flex flex-col items-center justify-center pointer-events-none px-4"
+          className="absolute z-20 flex flex-col items-center justify-center px-4"
         >
           <LoveChatFinale />
         </motion.div>
