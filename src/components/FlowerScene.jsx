@@ -21,7 +21,7 @@ function Flower({ scrollYProgress }) {
 
     // R3F Viewport detection for responsive placements
     const { width } = state.viewport;
-    const isMobile = width < 4.5;
+    const isMobile = window.innerWidth < 768;
 
     let targetScale = 0;
     let targetX = 0;
@@ -33,9 +33,14 @@ function Flower({ scrollYProgress }) {
       const bloomProgress = scrollVal / 0.4;
       const easedBloom = THREE.MathUtils.smoothstep(bloomProgress, 0, 1);
       
-      targetScale = easedBloom * (isMobile ? 1.6 : 2.4);
-      targetX = 0;
-      targetY = 0;
+      // Fully enlarged scale (highly immersive)
+      targetScale = easedBloom * (isMobile ? 2.5 : 4.0);
+      // Desktop: Shift exactly to the center of the right half (width * 0.25)
+      // Mobile: Centered horizontally (0)
+      targetX = isMobile ? 0 : width * 0.25;
+      // Desktop: Centered vertically
+      // Mobile: Shift down to make room for text at the top
+      targetY = isMobile ? -width * 0.32 : -0.1;
       targetZ = 0;
     } 
     // Phase 2: Shift to Background (scroll progress 0.4 -> 1.0)
@@ -43,22 +48,22 @@ function Flower({ scrollYProgress }) {
       const shiftProgress = Math.min(1, (scrollVal - 0.4) / 0.35); // shift completes by 75% scroll
       const easedShift = THREE.MathUtils.smoothstep(shiftProgress, 0, 1);
       
-      // Determine positions based on responsiveness
-      const desktopScale = 1.35;
-      const mobileScale = 1.0;
+      // Enlarged background scales
+      const desktopScale = 1.95;
+      const mobileScale = 1.45;
       
-      const startScale = isMobile ? 1.6 : 2.4;
+      const startScale = isMobile ? 2.5 : 4.0;
       const endScale = isMobile ? mobileScale : desktopScale;
       targetScale = THREE.MathUtils.lerp(startScale, endScale, easedShift);
 
       // Desktop: Shift right, push back
       // Mobile: Keep centered, shift down (to make room for book), push back
-      const endX = isMobile ? 0 : width * 0.22;
-      const endY = isMobile ? -width * 0.38 : -0.15;
-      const endZ = isMobile ? -1.5 : -1.0;
+      const endX = isMobile ? 0 : width * 0.25;
+      const endY = isMobile ? -width * 0.45 : -0.15;
+      const endZ = isMobile ? -2.0 : -1.0;
 
-      targetX = THREE.MathUtils.lerp(0, endX, easedShift);
-      targetY = THREE.MathUtils.lerp(0, endY, easedShift);
+      targetX = THREE.MathUtils.lerp(isMobile ? 0 : width * 0.25, endX, easedShift);
+      targetY = THREE.MathUtils.lerp(isMobile ? -width * 0.32 : -0.1, endY, easedShift);
       targetZ = THREE.MathUtils.lerp(0, endZ, easedShift);
     }
 
@@ -135,14 +140,21 @@ export default function FlowerScene() {
         {/* Page 2 Title Overlay (fades out as we scroll into the flipbook) */}
         <motion.div
           style={{ opacity: titleOpacity }}
-          className="absolute top-12 left-0 w-full text-center z-30 pointer-events-none px-4 select-none"
+          className="absolute inset-0 z-30 pointer-events-none px-6 md:px-16 select-none flex flex-col md:flex-row items-center justify-between max-w-5xl mx-auto"
         >
-          <h2 className="font-serif italic text-3xl md:text-5xl text-blush-accent font-semibold tracking-wide drop-shadow-md">
-            A Bouquet of Memories
-          </h2>
-          <p className="font-sans text-[9px] md:text-xs text-slate-500 mt-2 tracking-widest uppercase font-medium">
-            Touch, drag, and rotate the model to explore
-          </p>
+          {/* Text Container: Left on desktop, centered & top on mobile */}
+          <div className="w-full md:w-1/2 text-center md:text-left flex flex-col items-center md:items-start pt-16 md:pt-0">
+            <h2 className="font-serif italic text-3xl md:text-5xl lg:text-6xl text-blush-accent font-semibold tracking-wide drop-shadow-md leading-tight md:leading-snug">
+              A Bouquet <br className="hidden md:inline" /> of Memories
+            </h2>
+            <p className="font-sans text-[10px] md:text-xs text-slate-500 mt-3 md:mt-4 tracking-widest uppercase font-semibold">
+              Touch, drag, and rotate the model to explore
+            </p>
+            <div className="w-16 h-[2px] bg-blush-dark/50 mt-4 md:mt-6 rounded-full"></div>
+          </div>
+          
+          {/* Spacing spacer for 3D model placement (Right on desktop) */}
+          <div className="w-full md:w-1/2 h-[35vh] md:h-full pointer-events-none" />
         </motion.div>
 
         {/* Page 3 Flipbook Container (slides in from bottom, pointer-events are active on the book itself) */}
@@ -157,10 +169,11 @@ export default function FlowerScene() {
             camera={{ position: [0, 0, 4.5], fov: 45 }}
             className="w-full h-full bg-transparent pointer-events-auto"
           >
-            <ambientLight intensity={0.7} color="#FFF2F2" />
-            <directionalLight position={[10, 10, 5]} intensity={1.5} color="#FFFDF9" />
-            <spotLight position={[-10, 20, 10]} angle={0.25} penumbra={1} intensity={1.8} color="#FADADD" />
-            <pointLight position={[0, -10, -5]} intensity={0.6} color="#E8A5A5" />
+            <ambientLight intensity={1.2} color="#FFF5F5" />
+            <directionalLight position={[10, 10, 5]} intensity={2.0} color="#FFFDF9" />
+            <directionalLight position={[0, 0, 10]} intensity={1.6} color="#FFFFFF" />
+            <spotLight position={[-10, 20, 10]} angle={0.3} penumbra={1} intensity={2.2} color="#FADADD" />
+            <pointLight position={[0, -10, -5]} intensity={0.8} color="#E8A5A5" />
 
             <Suspense fallback={<CanvasLoader />}>
               <Flower scrollYProgress={scrollYProgress} />

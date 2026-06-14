@@ -26,50 +26,58 @@ const PHOTO_DATA = [
 ];
 
 // Reusable Page component using React.forwardRef as required by react-pageflip
-const BookPage = forwardRef(({ children, number, isCover = false, coverImage }, ref) => {
+const BookPage = forwardRef(({ children, number, isCover = false, coverImage, ...props }, ref) => {
   return (
     <div
-      className={`relative w-full h-full flex flex-col justify-between p-6 md:p-8 select-none shadow-2xl overflow-hidden ${
-        isCover 
-          ? 'bg-gradient-to-br from-blush to-blush-dark border-2 border-blush-accent text-white rounded-r-lg'
-          : 'bg-cream-dark border-l border-cream-light/60 text-slate-800'
-      }`}
+      {...props}
       ref={ref}
       style={{
-        boxShadow: isCover 
-          ? 'inset -5px 0 10px rgba(0,0,0,0.15), 5px 5px 15px rgba(0,0,0,0.2)'
-          : 'inset 5px 0 10px rgba(0,0,0,0.05), inset -5px 0 10px rgba(0,0,0,0.02), 5px 5px 10px rgba(0,0,0,0.08)'
+        ...props.style,
       }}
+      className={`page ${props.className || ''}`}
     >
-      {/* Background Image of the cover if provided */}
-      {isCover && coverImage && (
-        <img 
-          src={coverImage} 
-          alt="Cover Background" 
-          className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
-        />
-      )}
+      <div
+        className={`relative w-full h-full flex flex-col justify-between p-6 md:p-8 select-none shadow-2xl overflow-hidden ${
+          isCover 
+            ? 'bg-gradient-to-br from-blush to-blush-dark border-2 border-blush-accent text-white rounded-r-lg'
+            : 'bg-cream-dark border-l border-cream-light/60 text-slate-800'
+        }`}
+        style={{
+          boxShadow: isCover 
+            ? 'inset -5px 0 10px rgba(0,0,0,0.15), 5px 5px 15px rgba(0,0,0,0.2)'
+            : 'inset 5px 0 10px rgba(0,0,0,0.05), inset -5px 0 10px rgba(0,0,0,0.02), 5px 5px 10px rgba(0,0,0,0.08)'
+        }}
+      >
+        {/* Background Image of the cover if provided */}
+        {isCover && coverImage && (
+          <img 
+            src={coverImage} 
+            alt="Cover Background" 
+            className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
+          />
+        )}
 
-      {/* Background Image of the inner pages */}
-      {!isCover && (
-        <img 
-          src="/photos/bg flipbook.jpeg" 
-          alt="Page Background" 
-          className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
-        />
-      )}
+        {/* Background Image of the inner pages */}
+        {!isCover && (
+          <img 
+            src="/photos/bg flipbook.jpeg" 
+            alt="Page Background" 
+            className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
+          />
+        )}
 
-      {/* Page Content */}
-      <div className="flex-1 flex flex-col justify-center items-center h-full z-20">
-        {children}
-      </div>
-
-      {/* Page Number (Not shown on covers) */}
-      {!isCover && number && (
-        <div className="text-right font-serif text-[10px] text-slate-400 italic mt-2 self-end z-20">
-          Page {number}
+        {/* Page Content */}
+        <div className="flex-1 flex flex-col justify-center items-center h-full z-20">
+          {children}
         </div>
-      )}
+
+        {/* Page Number (Not shown on covers) */}
+        {!isCover && number && (
+          <div className="text-right font-serif text-[10px] text-slate-400 italic mt-2 self-end z-20">
+            Page {number}
+          </div>
+        )}
+      </div>
     </div>
   );
 });
@@ -147,11 +155,12 @@ export default function FlipbookMemories({ isVisible }) {
   const isClosedFront = currentPage === 0;
   const isClosedBack = currentPage === totalPages - 1;
 
-  // Place the binder rings permanently on the left edge of the book container
-  // to represent a left-bound notebook in all cover and page states.
-  const ringPositionClass = "left-0 -translate-x-[42%] md:-translate-x-[36%]";
+  // rings position:
+  // - Mobile: Always left-0 (since it is single-page portrait notebook bound on the left)
+  // - Desktop: Always in the center (50%) to act as a permanent central spine
+  const ringPositionClass = "left-0 -translate-x-[42%] md:left-1/2 md:-translate-x-1/2 md:translate-x-0";
 
-  // Metal loops are always bound on the left edge of the active page/book container
+  // Metal loops are bound on the left edge of the active page (or central spine)
   const isRightBound = false;
 
   const onFlip = (e) => {
@@ -165,7 +174,7 @@ export default function FlipbookMemories({ isVisible }) {
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       className="w-full max-w-4xl px-4 flex justify-center z-40 pointer-events-auto"
     >
-      <div className="relative w-full aspect-[4/3] md:aspect-[1.4/1] max-w-[700px] h-auto">
+      <div className="relative w-full aspect-[3/4] md:aspect-[1.4/1] max-w-[700px] h-auto">
         {/* Dynamic Binder Rings Spine */}
         <div className={`absolute top-[6%] bottom-[6%] w-12 flex flex-col justify-between items-center z-50 pointer-events-none transition-all duration-500 ${ringPositionClass}`}>
           {Array.from({ length: 9 }).map((_, i) => (
