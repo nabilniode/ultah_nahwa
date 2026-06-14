@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #FAF6EE;
+}
+
+/* Custom scrollbar styling to match the elegant cream theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #FAF6EE; /* cream */
+}
+::-webkit-scrollbar-thumb {
+  background: #E8A5A5; /* blush.dark */
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #D47575; /* blush.accent */
+}
+
+/* Lenis smooth scrolling default styles */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
